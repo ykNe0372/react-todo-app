@@ -21,7 +21,12 @@ type Props = {
   todo: Todo;
   updateIsDone: (id: string, value: boolean) => void;
   remove: (id: string) => void;
-  edit: (id: string, newName: string, newPriority: number) => void;
+  edit: (
+    id: string,
+    newName: string,
+    newPriority: number,
+    newNotes: string
+  ) => void;
 };
 
 const TodoItem = (props: Props) => {
@@ -51,12 +56,13 @@ const TodoItem = (props: Props) => {
     setEditTodoNotes(e.target.value);
   };
 
-  // const editTodo = () => {
-  //   const err = isValidTodoName(editTodoName);
-  //   if (err !== "") {
-  //     setEditTodoNameError(err);
-  //     return;
-  //   }
+  const editTodo = () => {
+    const err = isValidTodoName(editTodoName);
+    if (err !== "") {
+      setEditTodoNameError(err);
+      return;
+    }
+  };
   //   const editTodo: Todo = {
   //     id: uuid(),
   //     name: editTodoName,
@@ -152,6 +158,7 @@ const TodoItem = (props: Props) => {
                   <input
                     type="text"
                     id="editTodoName"
+                    defaultValue={todo.name}
                     value={editTodoName}
                     onChange={updateEditTodoName}
                     className={twMerge(
@@ -180,6 +187,7 @@ const TodoItem = (props: Props) => {
                       type="radio"
                       id={`priority-${value}`}
                       name="priorityGroup"
+                      defaultValue={todo.priority}
                       value={value}
                       checked={editTodoPriority === value}
                       onChange={updateEditTodoPriority}
@@ -187,6 +195,7 @@ const TodoItem = (props: Props) => {
                     <span>{value}</span>
                   </label>
                 ))}
+                <div className="text-sm text-gray-500">（初期値: 3）</div>
               </div>
 
               <div className="flex items-center space-x-2">
@@ -206,7 +215,13 @@ const TodoItem = (props: Props) => {
               <div className="flex gap-8 pt-2">
                 <button
                   onClick={() => {
-                    props.edit(todo.id, editTodoName, editTodoPriority);
+                    editTodo();
+                    props.edit(
+                      todo.id,
+                      editTodoName,
+                      editTodoPriority,
+                      editTodoNotes
+                    );
                     closeModalEdit();
                   }}
                   className={twMerge(

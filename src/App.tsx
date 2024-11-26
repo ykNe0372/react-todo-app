@@ -97,10 +97,25 @@ const App = () => {
     });
     setTodos(updatedTodos);
   };
-  const edit = (id: string, newName: string, newPriority: number) => {
+  const edit = (
+    id: string,
+    newName: string,
+    newPriority: number,
+    newNotes: string
+  ) => {
+    const emptyerr = isValidTodoName(newName);
+    if (emptyerr !== "") {
+      setNewTodoNameError(emptyerr);
+      return;
+    }
     const updatedTodos = todos.map((todo) => {
       if (todo.id === id) {
-        return { ...todo, name: newName, priority: newPriority };
+        return {
+          ...todo,
+          name: newName,
+          priority: newPriority,
+          notes: newNotes,
+        };
       } else return todo;
     });
     setTodos(updatedTodos);
@@ -202,6 +217,7 @@ const App = () => {
                   <span>{value}</span>
                 </label>
               ))}
+              <div className="text-sm text-gray-500">（初期値: 3）</div>
             </div>
 
             {/* 提出期限用UI */}
