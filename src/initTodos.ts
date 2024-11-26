@@ -4,37 +4,42 @@ import { v4 as uuid } from "uuid"; // v4 を uuid という名前でインポー
 export const initTodos: Todo[] = [
   {
     id: uuid(), // UUID v4 を生成してIDにセット
-    name: "解析2の宿題",
-    isDone: false,
-    priority: 2,
-    deadline: new Date(2024, 10, 2, 17, 30),
-  },
-  {
-    id: uuid(),
-    name: "TypeScriptの勉強 (復習)",
+    name: "課題1",
     isDone: true,
-    priority: 3,
-    deadline: null, // このTodoには期限を設定しない
-  },
-  {
-    id: uuid(),
-    name: "基礎物理学3の宿題",
-    isDone: false,
     priority: 1,
-    deadline: new Date(2024, 10, 11),
+    deadline: null, // このTodoには期限を設定しない
+    notes: "",
   },
   {
     id: uuid(),
-    name: "PBLのスライド作成",
+    name: "課題2",
+    isDone: false,
+    priority: 4,
+    deadline: new Date(2025, 1, 11),
+    notes: "",
+  },
+  {
+    id: uuid(),
+    name: "課題3",
     isDone: false,
     priority: 2,
-    deadline: new Date(2024, 10, 6, 8, 59),
+    deadline: new Date(2024, 11, 6, 8, 59),
+    notes: "",
   },
   {
     id: uuid(),
-    name: "線形代数のテスト直し",
+    name: "課題4",
     isDone: true,
-    priority: 3,
-    deadline: new Date(2024, 10, 6, 8, 59),
+    priority: 5,
+    deadline: new Date(2024, 11, 22, 8, 59),
+    notes: "教科書が必要",
+  },
+  {
+    id: uuid(),
+    name: "課題5",
+    isDone: false,
+    priority: 2,
+    deadline: new Date(2024, 11, 17, 17, 30),
+    notes: "",
   },
 ];

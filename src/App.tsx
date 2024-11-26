@@ -220,6 +220,7 @@ const App = () => {
                 onChange={updateDeadline}
                 className="rounded-md border border-gray-400 px-2 py-0.5"
               />
+              <div className="text-sm text-gray-500">（任意入力）</div>
             </div>
 
             <div className="mb-4 flex items-center gap-x-2">
