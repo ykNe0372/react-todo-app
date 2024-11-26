@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Modal from "react-modal";
 import { Todo } from "./types";
 import { initTodos } from "./initTodos";
-import WelcomeMessage from "./WelcomeMessage";
+// import WelcomeMessage from "./Welcome";
 import TodoList from "./TodoList";
 import { v4 as uuid } from "uuid";
 import dayjs from "dayjs";
@@ -21,8 +21,10 @@ const App = () => {
   const [newTodoName, setNewTodoName] = useState("");
   const [newTodoPriority, setNewTodoPriority] = useState(3);
   const [newTodoDeadline, setNewTodoDeadline] = useState<Date | null>(null);
+  const [newTodoNotes, setNewTodoNotes] = useState("");
   const [newTodoNameError, setNewTodoNameError] = useState("");
-  const [modal, setModal] = useState(false);
+  const [modalNewTodo, setModalNewTodo] = useState(false);
+  const [modalCheckedDelete, setModalCheckedDelete] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const localStorageKey = "TodoApp";
 
@@ -47,9 +49,9 @@ const App = () => {
     }
   }, [todos, initialized]);
 
-  const uncompletedCount = initTodos.filter(
-    (todo: Todo) => !todo.isDone
-  ).length;
+  // const uncompletedCount = initTodos.filter(
+  //   (todo: Todo) => !todo.isDone
+  // ).length;
   const isValidTodoName = (name: string): string => {
     if (name.length < 2 || name.length > 32) {
       return "2文字以上、32文字以内で入力してください";
@@ -59,11 +61,17 @@ const App = () => {
     const updatedTodos = todos.filter((todo) => todo.id !== id);
     setTodos(updatedTodos);
   };
-  const openModal = (num) => {
-    setModal(num);
+  const openModalNewTodo = () => {
+    setModalNewTodo(true);
   };
-  const closeModal = () => {
-    setModal(false);
+  const openModalCheckedDelete = () => {
+    setModalCheckedDelete(true);
+  };
+  const closeModalNewTodo = () => {
+    setModalNewTodo(false);
+  };
+  const closeModalCheckedDelete = () => {
+    setModalCheckedDelete(false);
   };
 
   const updateNewTodoName = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,10 +86,21 @@ const App = () => {
     console.log(`UI操作で日時が "${dt}" (${typeof dt}型) に変更されました。`);
     setNewTodoDeadline(dt === "" ? null : new Date(dt));
   };
+  const updateNewTodoNotes = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewTodoNotes(e.target.value);
+  };
   const updateIsDone = (id: string, value: boolean) => {
     const updatedTodos = todos.map((todo) => {
       if (todo.id === id) {
         return { ...todo, isDone: value };
+      } else return todo;
+    });
+    setTodos(updatedTodos);
+  };
+  const edit = (id: string, newName: string, newPriority: number) => {
+    const updatedTodos = todos.map((todo) => {
+      if (todo.id === id) {
+        return { ...todo, name: newName, priority: newPriority };
       } else return todo;
     });
     setTodos(updatedTodos);
@@ -99,12 +118,14 @@ const App = () => {
       isDone: false,
       priority: newTodoPriority,
       deadline: newTodoDeadline,
+      notes: newTodoNotes,
     };
     const updatedTodos = [...todos, newTodo];
     setTodos(updatedTodos);
     setNewTodoName("");
     setNewTodoPriority(3);
     setNewTodoDeadline(null);
+    setNewTodoNotes("");
   };
 
   const removeCompletedTodos = () => {
@@ -116,22 +137,23 @@ const App = () => {
     <div className="mx-4 mt-10 max-w-2xl md:mx-auto">
       <h1 className="mb-4 ml-4 text-2xl font-bold">TodoApp</h1>
       <div className="mb-4 ml-4">
-        <WelcomeMessage name="匿名希望" uncompletedCount={uncompletedCount} />
+        {/* <WelcomeMessage name="匿名希望" uncompletedCount={uncompletedCount} /> */}
       </div>
       <div>
         <button
           type="button"
-          onClick={() => openModal(0)}
+          onClick={openModalNewTodo}
           className="mb-5 ml-4 mt-2 flex items-center justify-center whitespace-nowrap rounded-md bg-blue-400 px-4 py-2 text-white hover:bg-blue-600"
         >
           <FontAwesomeIcon icon={faListCheck} className="mr-1.5 text-white" />
           タスクの追加
         </button>
         <Modal
-          isOpen={modal === 0}
+          isOpen={modalNewTodo}
           className={
-            "mx-auto mt-60 max-h-80 min-h-44 min-w-60 max-w-lg rounded-md border border-slate-500 bg-white p-3"
+            "mx-auto mt-20 min-h-44 min-w-60 max-w-lg rounded-md border border-slate-500 bg-white p-3"
           }
+          ariaHideApp={false}
         >
           {/* 課題名入力用テキストボックス */}
           <div className="items-center justify-center space-y-3 rounded-md px-3 py-5">
@@ -200,13 +222,27 @@ const App = () => {
               />
             </div>
 
+            <div className="mb-4 flex items-center gap-x-2">
+              <label htmlFor="notes" className="font-bold">
+                備考
+              </label>
+              <input
+                type="text"
+                id="notes"
+                value={newTodoNotes}
+                onChange={updateNewTodoNotes}
+                className={twMerge("grow rounded-md border p-2")}
+                placeholder="メモなどを記入してください (任意入力)"
+              />
+            </div>
+
             <div className="flex items-center gap-x-8">
               {/* 追加ボタン */}
               <button
                 type="button"
                 onClick={() => {
                   addNewTodo();
-                  closeModal();
+                  closeModalNewTodo();
                 }}
                 className={twMerge(
                   "my-2 rounded-md bg-blue-400 px-4 py-2 font-bold text-white hover:bg-blue-400",
@@ -222,7 +258,7 @@ const App = () => {
 
               {/* 戻る用ボタン */}
               <button
-                onClick={closeModal}
+                onClick={closeModalNewTodo}
                 className="my-2 justify-center whitespace-nowrap rounded-md bg-slate-500 px-4 py-2 text-white hover:bg-slate-700"
               >
                 <FontAwesomeIcon icon={faXmark} className="mr-1.5 text-white" />
@@ -232,22 +268,28 @@ const App = () => {
           </div>
         </Modal>
       </div>
-      <TodoList todos={todos} updateIsDone={updateIsDone} remove={remove} />
+      <TodoList
+        todos={todos}
+        updateIsDone={updateIsDone}
+        remove={remove}
+        edit={edit}
+      />
 
       {/* 完了タスク一括削除ボタン */}
       {/* タスクが1つもなければ表示しないようにしたい */}
       <button
         type="button"
-        onClick={() => openModal(1)}
+        onClick={openModalCheckedDelete}
         className="my-5 ml-4 rounded-md bg-red-500 px-3 py-1 font-bold text-white hover:bg-red-600"
       >
         完了済みのタスクを削除
       </button>
       <Modal
-        isOpen={modal === 1}
+        isOpen={modalCheckedDelete}
         className={
-          "mx-auto  mt-72 max-h-80 w-80 border border-slate-600 bg-white p-3"
+          "mx-auto my-20 max-h-80 w-80 border border-slate-600 bg-white p-3"
         }
+        ariaHideApp={false}
       >
         <h1 className="mt-3 flex items-center justify-center">
           完了済みのタスクを全て削除します<br></br>
@@ -257,7 +299,7 @@ const App = () => {
           <button
             onClick={() => {
               removeCompletedTodos();
-              closeModal();
+              closeModalCheckedDelete();
             }}
             className="my-4 rounded-md bg-red-500 px-3 py-2 text-sm font-bold text-white hover:bg-red-600"
           >
@@ -265,7 +307,7 @@ const App = () => {
             削除する
           </button>
           <button
-            onClick={closeModal}
+            onClick={closeModalCheckedDelete}
             className="whitespace-nowrap rounded-md bg-slate-500 px-3 py-2 text-sm text-white hover:bg-slate-700"
           >
             <FontAwesomeIcon icon={faXmark} className="mr-1.5 text-white" />

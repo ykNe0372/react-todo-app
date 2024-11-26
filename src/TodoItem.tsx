@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import Modal from "react-modal";
 import { Todo } from "./types";
-import { initTodos } from "./initTodos";
+// import { initTodos } from "./initTodos";
 import dayjs from "dayjs";
-import { v4 as uuid } from "uuid";
+// import { v4 as uuid } from "uuid";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCheck,
@@ -21,14 +21,18 @@ type Props = {
   todo: Todo;
   updateIsDone: (id: string, value: boolean) => void;
   remove: (id: string) => void;
+  edit: (id: string, newName: string, newPriority: number) => void;
 };
 
 const TodoItem = (props: Props) => {
   const todo = props.todo;
-  const [todos, setTodos] = useState<Todo[]>(initTodos);
+  // const [todos, setTodos] = useState<Todo[]>(initTodos);
   const [editTodoName, setEditTodoName] = useState("");
+  const [editTodoPriority, setEditTodoPriority] = useState(3);
+  const [editTodoNotes, setEditTodoNotes] = useState("");
   const [editTodoNameError, setEditTodoNameError] = useState("");
-  const [modal, setModal] = useState(false);
+  const [modalEdit, setModalEdit] = useState(false);
+  const [modalDelete, setModalDelete] = useState(false);
 
   const isValidTodoName = (name: string): string => {
     if (name.length < 2 || name.length > 32) {
@@ -40,29 +44,42 @@ const TodoItem = (props: Props) => {
     setEditTodoNameError(isValidTodoName(e.target.value));
     setEditTodoName(e.target.value);
   };
+  const updateEditTodoPriority = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEditTodoPriority(Number(e.target.value));
+  };
+  const updateEditTodoNotes = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEditTodoNotes(e.target.value);
+  };
 
-  const EditTodo = () => {
-    const err = isValidTodoName(editTodoName);
-    if (err !== "") {
-      setEditTodoNameError(err);
-      return;
-    }
-    const editTodo: Todo = {
-      id: uuid(),
-      name: editTodoName,
-      isDone: todo.isDone,
-      priority: todo.priority,
-      deadline: todo.deadline,
-    };
-    const updatedTodos = [...todos, editTodo];
-    setTodos(updatedTodos);
-    setEditTodoName(editTodoName);
+  // const editTodo = () => {
+  //   const err = isValidTodoName(editTodoName);
+  //   if (err !== "") {
+  //     setEditTodoNameError(err);
+  //     return;
+  //   }
+  //   const editTodo: Todo = {
+  //     id: uuid(),
+  //     name: editTodoName,
+  //     isDone: todo.isDone,
+  //     priority: editTodoPriority,
+  //     deadline: todo.deadline,
+  //   };
+  //   const updatedTodos = [...todos, editTodo];
+  //   setTodos(updatedTodos);
+  //   setEditTodoName(editTodoName);
+  //   setEditTodoPriority(editTodoPriority);
+  // };
+  const openModalEdit = () => {
+    setModalEdit(true);
   };
-  const openModal = (num) => {
-    setModal(num);
+  const openModalDelete = () => {
+    setModalDelete(true);
   };
-  const closeModal = () => {
-    setModal(false);
+  const closeModalEdit = () => {
+    setModalEdit(false);
+  };
+  const closeModalDelete = () => {
+    setModalDelete(false);
   };
 
   return (
@@ -89,7 +106,7 @@ const TodoItem = (props: Props) => {
             <div className={twMerge("ml-1.5 text-md md:text-lg font-bold")}>
               {todo.name}
             </div>
-            <div className="ml-4 text-sm">[備考とかなんか書く欄]</div>
+            <div className="ml-4 text-sm text-gray-500">{todo.notes}</div>
           </div>
 
           <div className="ml-1.5 mt-2 flex items-center border-t-2 pt-1">
@@ -112,17 +129,18 @@ const TodoItem = (props: Props) => {
         <div>
           <button
             type="button"
-            onClick={() => openModal(0)}
+            onClick={openModalEdit}
             className="ml-4 justify-center whitespace-nowrap rounded-md bg-slate-500 px-3   py-2 text-sm text-white hover:bg-slate-700"
           >
             <FontAwesomeIcon icon={faPen} className="mr-1.5 text-white" />
             編集
           </button>
           <Modal
-            isOpen={modal === 0}
+            isOpen={modalEdit}
             className={
-              "mx-auto mt-60 max-h-80 min-h-44 min-w-60 max-w-lg rounded-md border border-slate-500 bg-white p-3"
+              "mx-auto mt-20 max-h-80 min-h-44 min-w-60 max-w-lg rounded-md border border-slate-500 bg-white p-3"
             }
+            ariaHideApp={false}
           >
             <div className="items-center justify-center space-y-3 rounded-md px-3 py-5">
               <h2 className="text-lg font-bold">既存タスクの編集</h2>
@@ -154,14 +172,45 @@ const TodoItem = (props: Props) => {
                 )}
               </div>
 
-              <div className="flex gap-8 pt-4">
+              <div className="flex gap-5">
+                <div className="font-bold">優先度</div>
+                {[1, 2, 3, 4, 5].map((value) => (
+                  <label key={value} className="flex items-center space-x-1">
+                    <input
+                      type="radio"
+                      id={`priority-${value}`}
+                      name="priorityGroup"
+                      value={value}
+                      checked={editTodoPriority === value}
+                      onChange={updateEditTodoPriority}
+                    />
+                    <span>{value}</span>
+                  </label>
+                ))}
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <label htmlFor="editTodoNotes" className="font-bold">
+                  備考
+                </label>
+                <input
+                  type="text"
+                  id="editTodoNotes"
+                  value={editTodoNotes}
+                  onChange={updateEditTodoNotes}
+                  className={twMerge("grow rouded-md border p-2")}
+                  placeholder="メモなどを記入してください (任意入力)"
+                />
+              </div>
+
+              <div className="flex gap-8 pt-2">
                 <button
                   onClick={() => {
-                    EditTodo();
-                    closeModal();
+                    props.edit(todo.id, editTodoName, editTodoPriority);
+                    closeModalEdit();
                   }}
                   className={twMerge(
-                    "my-2 whitespace-nowrap rounded-md bg-cyan-500 px-4 py-2 text-white hover:bg-cyan-700",
+                    "whitespace-nowrap rounded-md bg-cyan-500 px-4 py-2 text-white hover:bg-cyan-700",
                     editTodoNameError && "cursor-not-allowed opacity-50"
                   )}
                 >
@@ -169,8 +218,8 @@ const TodoItem = (props: Props) => {
                   完了
                 </button>
                 <button
-                  onClick={closeModal}
-                  className="my-2 whitespace-nowrap rounded-md bg-slate-500 px-3 py-2 text-sm text-white hover:bg-slate-700"
+                  onClick={closeModalEdit}
+                  className="whitespace-nowrap rounded-md bg-slate-500 px-3 py-2 text-sm text-white hover:bg-slate-700"
                 >
                   <FontAwesomeIcon
                     icon={faXmark}
@@ -182,7 +231,7 @@ const TodoItem = (props: Props) => {
             </div>
           </Modal>
           <button
-            onClick={() => openModal(1)}
+            onClick={openModalDelete}
             // onClick={() => props.remove(todo.id)}
             className="ml-4 mt-2 justify-center whitespace-nowrap rounded-md bg-red-400 px-3 py-2 text-sm text-white hover:bg-red-500"
           >
@@ -190,10 +239,11 @@ const TodoItem = (props: Props) => {
             削除
           </button>
           <Modal
-            isOpen={modal === 1}
+            isOpen={modalDelete}
             className={
-              "mx-auto mt-72 max-h-80 w-80 border border-slate-600 bg-white p-3"
+              "mx-auto mt-20 max-h-80 w-80 border border-slate-600 bg-white p-3"
             }
+            ariaHideApp={false}
           >
             <h1 className="mx-2 mt-3 flex items-center justify-center">
               「{todo.name}」 を削除しますか？
@@ -202,7 +252,7 @@ const TodoItem = (props: Props) => {
               <button
                 onClick={() => {
                   props.remove(todo.id);
-                  closeModal();
+                  closeModalDelete();
                 }}
                 className="my-4 rounded-md bg-red-500 px-3 py-2 text-sm text-white hover:bg-red-600"
               >
@@ -213,7 +263,7 @@ const TodoItem = (props: Props) => {
                 削除する
               </button>
               <button
-                onClick={closeModal}
+                onClick={closeModalDelete}
                 className="whitespace-nowrap rounded-md bg-slate-500 px-3 py-2 text-sm text-white hover:bg-slate-700"
               >
                 <FontAwesomeIcon icon={faXmark} className="mr-1.5 text-white" />
