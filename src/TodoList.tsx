@@ -15,18 +15,14 @@ type Props = {
 };
 
 const TodoList = (props: Props) => {
-  // const todos = [...props.todos].sort((a, b) => {
-  //   if (a.isDone !== b.isDone) {
-  //     return a.isDone ? 1 : -1;
-  //   } else {
-  //     return a.deadline === null
-  //       ? 1
-  //       : b.deadline === null
-  //         ? 1
-  //         : a.deadline.getTime() - b.deadline.getTime();
-  //   }
-  // });
-  const todos = props.todos;
+  const todos = [...props.todos].sort((a, b) => {
+    return a.deadline === null
+      ? 1
+      : b.deadline === null
+        ? 1
+        : a.deadline.getTime() - b.deadline.getTime();
+  });
+  // const todos = props.todos;
 
   if (todos.length === 0) {
     return <div className="ml-4">現在、登録されているタスクはありません</div>;

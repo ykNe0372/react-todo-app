@@ -119,9 +119,21 @@ const TodoItem = (props: Props) => {
             <FontAwesomeIcon
               icon={faClock}
               flip="horizontal"
-              className="mr-1.5 text-gray-500"
+              className={twMerge(
+                "mr-1.5 text-slate-500",
+                todo.deadline !== null &&
+                  todo.deadline < new Date() &&
+                  "text-red-500 font-bold"
+              )}
             />
-            <div className={twMerge("flex text-slate-500")}>
+            <div
+              className={twMerge(
+                "flex text-slate-500",
+                todo.deadline !== null &&
+                  todo.deadline < new Date() &&
+                  "text-red-500 font-bold"
+              )}
+            >
               期限:
               {todo.deadline !== null && (
                 <div className="ml-2">{dayjs(todo.deadline).format(dtFmt)}</div>
