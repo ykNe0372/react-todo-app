@@ -36,11 +36,17 @@ const TodoItem = (props: Props) => {
   const [editTodoPriority, setEditTodoPriority] = useState(3);
   const [editTodoNotes, setEditTodoNotes] = useState("");
   const [editTodoNameError, setEditTodoNameError] = useState("");
+  const [editTodoNoteError, seteditTodoNoteError] = useState("");
   const [modalEdit, setModalEdit] = useState(false);
   const [modalDelete, setModalDelete] = useState(false);
 
   const isValidTodoName = (name: string): string => {
     if (name.length < 2 || name.length > 32) {
+      return "2文字以上、32文字以内で入力してください";
+    } else return "";
+  };
+  const isValidTodoNote = (notes: string): string => {
+    if (notes.length < 2 || notes.length > 32) {
       return "2文字以上、32文字以内で入力してください";
     } else return "";
   };
@@ -53,13 +59,19 @@ const TodoItem = (props: Props) => {
     setEditTodoPriority(Number(e.target.value));
   };
   const updateEditTodoNotes = (e: React.ChangeEvent<HTMLInputElement>) => {
+    seteditTodoNoteError(isValidTodoNote(e.target.value));
     setEditTodoNotes(e.target.value);
   };
 
   const editTodo = () => {
-    const err = isValidTodoName(editTodoName);
-    if (err !== "") {
-      setEditTodoNameError(err);
+    const nameErr = isValidTodoName(editTodoName);
+    if (nameErr !== "") {
+      setEditTodoNameError(nameErr);
+      return;
+    }
+    const noteErr = isValidTodoNote(editTodoNotes);
+    if (noteErr !== "") {
+      seteditTodoNoteError(noteErr);
       return;
     }
   };
@@ -107,7 +119,7 @@ const TodoItem = (props: Props) => {
           <div className="whitespace-nowrap">優先度</div>
           <span className="mx-4 text-base">{todo.priority}</span>
         </div>
-        <div className="container ml-2">
+        <div className="container ml-2 ">
           <div className="flex items-baseline">
             <div className={twMerge("ml-1.5 text-md md:text-lg font-bold")}>
               {todo.name}
@@ -119,9 +131,21 @@ const TodoItem = (props: Props) => {
             <FontAwesomeIcon
               icon={faClock}
               flip="horizontal"
-              className="mr-1.5 text-gray-500"
+              className={twMerge(
+                "mr-1.5 text-slate-500",
+                todo.deadline !== null &&
+                  todo.deadline < new Date() &&
+                  "text-red-500 font-bold"
+              )}
             />
-            <div className={twMerge("flex text-slate-500")}>
+            <div
+              className={twMerge(
+                "flex text-slate-500",
+                todo.deadline !== null &&
+                  todo.deadline < new Date() &&
+                  "text-red-500 font-bold"
+              )}
+            >
               期限:
               {todo.deadline !== null && (
                 <div className="ml-2">{dayjs(todo.deadline).format(dtFmt)}</div>
@@ -195,21 +219,37 @@ const TodoItem = (props: Props) => {
                     <span>{value}</span>
                   </label>
                 ))}
-                <div className="text-sm text-gray-500">（初期値: 3）</div>
+                <div className="text-sm text-gray-500">
+                  （編集前: {todo.priority}）
+                </div>
               </div>
 
-              <div className="flex items-center space-x-2">
-                <label htmlFor="editTodoNotes" className="font-bold">
-                  備考
-                </label>
-                <input
-                  type="text"
-                  id="editTodoNotes"
-                  value={editTodoNotes}
-                  onChange={updateEditTodoNotes}
-                  className={twMerge("grow rouded-md border p-2")}
-                  placeholder="メモなどを記入してください (任意入力)"
-                />
+              <div>
+                <div className="flex items-center space-x-2">
+                  <label htmlFor="editTodoNotes" className="font-bold">
+                    備考
+                  </label>
+                  <input
+                    type="text"
+                    id="editTodoNotes"
+                    value={editTodoNotes}
+                    onChange={updateEditTodoNotes}
+                    className={twMerge(
+                      "grow rouded-md border p-2",
+                      editTodoNoteError && "border-red-500 outline-red-500"
+                    )}
+                    placeholder="メモなどを記入してください (任意入力)"
+                  />
+                </div>
+                {editTodoNoteError && (
+                  <div className="ml-10 flex items-center space-x-1 text-sm font-bold text-red-500">
+                    <FontAwesomeIcon
+                      icon={faTriangleExclamation}
+                      className="mr-0.5"
+                    />
+                    <div>{editTodoNoteError}</div>
+                  </div>
+                )}
               </div>
 
               <div className="flex gap-8 pt-2">
@@ -226,7 +266,8 @@ const TodoItem = (props: Props) => {
                   }}
                   className={twMerge(
                     "whitespace-nowrap rounded-md bg-cyan-500 px-4 py-2 text-white hover:bg-cyan-700",
-                    editTodoNameError && "cursor-not-allowed opacity-50"
+                    (editTodoNameError || editTodoNoteError) &&
+                      "cursor-not-allowed opacity-50"
                   )}
                 >
                   <FontAwesomeIcon icon={faCheck} className="mr-1 text-white" />
