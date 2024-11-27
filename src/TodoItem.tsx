@@ -46,8 +46,8 @@ const TodoItem = (props: Props) => {
     } else return "";
   };
   const isValidTodoNote = (notes: string): string => {
-    if (notes.length < 2 || notes.length > 32) {
-      return "2文字以上、32文字以内で入力してください";
+    if (notes.length > 32) {
+      return "32文字以内で入力してください";
     } else return "";
   };
 
