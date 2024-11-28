@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Modal from "react-modal";
 import { Todo } from "./types";
 import { initTodos } from "./initTodos";
-// import WelcomeMessage from "./Welcome";
+import WelcomeMessage from "./WelcomeMessage";
 import TodoList from "./TodoList";
 import { v4 as uuid } from "uuid";
 import dayjs from "dayjs";
@@ -14,6 +14,7 @@ import {
   faTrashCan,
   faXmark,
   faFileCirclePlus,
+  faClipboard,
 } from "@fortawesome/free-solid-svg-icons";
 
 const App = () => {
@@ -23,6 +24,7 @@ const App = () => {
   const [newTodoDeadline, setNewTodoDeadline] = useState<Date | null>(null);
   const [newTodoNotes, setNewTodoNotes] = useState("");
   const [newTodoNameError, setNewTodoNameError] = useState("");
+  const [newTodoNoteError, setNewTodoNoteError] = useState("");
   const [modalNewTodo, setModalNewTodo] = useState(false);
   const [modalCheckedDelete, setModalCheckedDelete] = useState(false);
   const [initialized, setInitialized] = useState(false);
@@ -53,8 +55,13 @@ const App = () => {
   //   (todo: Todo) => !todo.isDone
   // ).length;
   const isValidTodoName = (name: string): string => {
-    if (name.length < 2 || name.length > 32) {
-      return "2文字以上、32文字以内で入力してください";
+    if (name.length < 1 || name.length > 32) {
+      return "1文字以上、32文字以内で入力してください";
+    } else return "";
+  };
+  const isValidTodoNote = (notes: string): string => {
+    if (notes.length > 32) {
+      return "32文字以内で入力してください";
     } else return "";
   };
   const remove = (id: string) => {
@@ -87,6 +94,7 @@ const App = () => {
     setNewTodoDeadline(dt === "" ? null : new Date(dt));
   };
   const updateNewTodoNotes = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewTodoNoteError(isValidTodoNote(e.target.value));
     setNewTodoNotes(e.target.value);
   };
   const updateIsDone = (id: string, value: boolean) => {
@@ -122,9 +130,14 @@ const App = () => {
   };
 
   const addNewTodo = () => {
-    const err = isValidTodoName(newTodoName);
-    if (err !== "") {
-      setNewTodoNameError(err);
+    const nameErr = isValidTodoName(newTodoName);
+    if (nameErr !== "") {
+      setNewTodoNameError(nameErr);
+      return;
+    }
+    const noteErr = isValidTodoNote(newTodoNotes);
+    if (noteErr !== "") {
+      setNewTodoNoteError(noteErr);
       return;
     }
     const newTodo: Todo = {
@@ -150,156 +163,180 @@ const App = () => {
 
   return (
     <div className="mx-4 mt-10 max-w-2xl md:mx-auto">
-      <h1 className="mb-4 ml-4 text-2xl font-bold">TodoApp</h1>
-      <div className="mb-4 ml-4">
-        {/* <WelcomeMessage name="匿名希望" uncompletedCount={uncompletedCount} /> */}
-      </div>
-      <div>
-        <button
-          type="button"
-          onClick={openModalNewTodo}
-          className="mb-5 ml-4 mt-2 flex items-center justify-center whitespace-nowrap rounded-md bg-blue-400 px-4 py-2 text-white hover:bg-blue-600"
-        >
-          <FontAwesomeIcon icon={faListCheck} className="mr-1.5 text-white" />
-          タスクの追加
-        </button>
-        <Modal
-          isOpen={modalNewTodo}
-          className={
-            "mx-auto mt-20 min-h-44 min-w-60 max-w-lg rounded-md border border-slate-500 bg-white p-3"
-          }
-          ariaHideApp={false}
-        >
-          {/* 課題名入力用テキストボックス */}
-          <div className="items-center justify-center space-y-3 rounded-md px-3 py-5">
-            <h2 className="text-lg font-bold">新しいタスクの追加</h2>
-            <div>
-              <div className="flex items-center space-x-2">
-                <label htmlFor="newTodoName" className="font-bold">
-                  名前
+      <div className="flex items-center">
+        <h1 className="container ml-5 text-2xl font-bold text-slate-700">
+          <FontAwesomeIcon icon={faClipboard} className="mr-2" />
+          Todoアプリ
+        </h1>
+        <div>
+          <button
+            type="button"
+            onClick={openModalNewTodo}
+            className="ml-4 mt-2 flex items-center justify-center whitespace-nowrap rounded-md bg-blue-400 px-4 py-2 text-white hover:bg-blue-600"
+          >
+            <FontAwesomeIcon icon={faListCheck} className="mr-1.5 text-white" />
+            タスクの追加
+          </button>
+          <Modal
+            isOpen={modalNewTodo}
+            className={
+              "mx-auto mt-20 min-h-44 min-w-60 max-w-lg rounded-md border border-slate-500 bg-white p-3"
+            }
+            ariaHideApp={false}
+          >
+            {/* 課題名入力用テキストボックス */}
+            <div className="items-center justify-center space-y-3 rounded-md px-3 py-5">
+              <h2 className="text-lg font-bold">新しいタスクの追加</h2>
+              <div>
+                <div className="flex items-center space-x-2">
+                  <label htmlFor="newTodoName" className="font-bold">
+                    名前
+                  </label>
+                  <input
+                    type="text"
+                    id="newTodoName"
+                    value={newTodoName}
+                    onChange={updateNewTodoName}
+                    className={twMerge(
+                      "grow rounded-md border p-2",
+                      newTodoNameError && "border-red-500 outline-red-500"
+                    )}
+                    placeholder="1文字以上、32文字以内で入力してください"
+                  />
+                </div>
+                {newTodoNameError && (
+                  <div className="ml-10 flex items-center space-x-1 text-sm font-bold text-red-500">
+                    <FontAwesomeIcon
+                      icon={faTriangleExclamation}
+                      className="mr-0.5"
+                    />
+                    <div>{newTodoNameError}</div>
+                  </div>
+                )}
+              </div>
+
+              {/* 優先度用ラジオボタン */}
+              <div className="flex gap-5">
+                <div className="font-bold">優先度</div>
+                {[1, 2, 3, 4, 5].map((value) => (
+                  <label key={value} className="flex items-center space-x-1">
+                    <input
+                      type="radio"
+                      id={`priority-${value}`}
+                      name="prioityGroup"
+                      value={value}
+                      checked={newTodoPriority === value}
+                      onChange={updateNewTodoPriority}
+                    />
+                    <span>{value}</span>
+                  </label>
+                ))}
+                {/* <div className="text-sm text-gray-500">（初期値: 3）</div> */}
+              </div>
+
+              {/* 提出期限用UI */}
+              <div className="mb-4 flex items-center gap-x-2">
+                <label htmlFor="deadline" className="font-bold">
+                  期限
                 </label>
                 <input
-                  type="text"
-                  id="newTodoName"
-                  value={newTodoName}
-                  onChange={updateNewTodoName}
-                  className={twMerge(
-                    "grow rounded-md border p-2",
-                    newTodoNameError && "border-red-500 outline-red-500"
-                  )}
-                  placeholder="2文字以上、32文字以内で入力してください"
+                  type="datetime-local"
+                  id="deadline"
+                  value={
+                    newTodoDeadline
+                      ? dayjs(newTodoDeadline).format("YYYY-MM-DDTHH:mm:ss")
+                      : ""
+                  }
+                  onChange={updateDeadline}
+                  className="rounded-md border border-gray-400 px-2 py-0.5"
                 />
+                <div className="text-sm text-gray-500">（任意）</div>
               </div>
-              {newTodoNameError && (
-                <div className="ml-10 flex items-center space-x-1 text-sm font-bold text-red-500">
-                  <FontAwesomeIcon
-                    icon={faTriangleExclamation}
-                    className="mr-0.5"
-                  />
-                  <div>{newTodoNameError}</div>
-                </div>
-              )}
-            </div>
 
-            {/* 優先度用ラジオボタン */}
-            <div className="flex gap-5">
-              <div className="font-bold">優先度</div>
-              {[1, 2, 3, 4, 5].map((value) => (
-                <label key={value} className="flex items-center space-x-1">
+              <div>
+                <div className="mb-4 flex items-center gap-x-2">
+                  <label htmlFor="newTodoNotes" className="font-bold">
+                    備考
+                  </label>
                   <input
-                    type="radio"
-                    id={`priority-${value}`}
-                    name="prioityGroup"
-                    value={value}
-                    checked={newTodoPriority === value}
-                    onChange={updateNewTodoPriority}
+                    type="text"
+                    id="newTodoNotes"
+                    value={newTodoNotes}
+                    onChange={updateNewTodoNotes}
+                    className={twMerge(
+                      "grow rounded-md border p-2",
+                      newTodoNoteError && "border-red-500 outline-red-500"
+                    )}
+                    placeholder="メモなどを記入してください (任意)"
                   />
-                  <span>{value}</span>
-                </label>
-              ))}
-              <div className="text-sm text-gray-500">（初期値: 3）</div>
-            </div>
-
-            {/* 提出期限用UI */}
-            <div className="mb-4 flex items-center gap-x-2">
-              <label htmlFor="deadline" className="font-bold">
-                期限
-              </label>
-              <input
-                type="datetime-local"
-                id="deadline"
-                value={
-                  newTodoDeadline
-                    ? dayjs(newTodoDeadline).format("YYYY-MM-DDTHH:mm:ss")
-                    : ""
-                }
-                onChange={updateDeadline}
-                className="rounded-md border border-gray-400 px-2 py-0.5"
-              />
-              <div className="text-sm text-gray-500">（任意入力）</div>
-            </div>
-
-            <div className="mb-4 flex items-center gap-x-2">
-              <label htmlFor="notes" className="font-bold">
-                備考
-              </label>
-              <input
-                type="text"
-                id="notes"
-                value={newTodoNotes}
-                onChange={updateNewTodoNotes}
-                className={twMerge("grow rounded-md border p-2")}
-                placeholder="メモなどを記入してください (任意入力)"
-              />
-            </div>
-
-            <div className="flex items-center gap-x-8">
-              {/* 追加ボタン */}
-              <button
-                type="button"
-                onClick={() => {
-                  addNewTodo();
-                  closeModalNewTodo();
-                }}
-                className={twMerge(
-                  "my-2 rounded-md bg-blue-400 px-4 py-2 font-bold text-white hover:bg-blue-400",
-                  newTodoNameError && "cursor-not-allowed opacity-50"
+                </div>
+                {newTodoNoteError && (
+                  <div className="ml-10 flex items-center space-x-1 text-sm font-bold text-red-500">
+                    <FontAwesomeIcon
+                      icon={faTriangleExclamation}
+                      className="mr-0.5"
+                    />
+                    <div>{newTodoNoteError}</div>
+                  </div>
                 )}
-              >
-                <FontAwesomeIcon
-                  icon={faFileCirclePlus}
-                  className="mr-1.5 text-white"
-                />
-                追加
-              </button>
+              </div>
 
-              {/* 戻る用ボタン */}
-              <button
-                onClick={closeModalNewTodo}
-                className="my-2 justify-center whitespace-nowrap rounded-md bg-slate-500 px-4 py-2 text-white hover:bg-slate-700"
-              >
-                <FontAwesomeIcon icon={faXmark} className="mr-1.5 text-white" />
-                キャンセル
-              </button>
+              <div className="flex items-center gap-x-8">
+                {/* 追加ボタン */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    addNewTodo();
+                    closeModalNewTodo();
+                  }}
+                  className={twMerge(
+                    "my-2 rounded-md bg-blue-400 px-4 py-2 font-bold text-white hover:bg-blue-400",
+                    (newTodoNameError || newTodoNoteError) &&
+                      "cursor-not-allowed opacity-50"
+                  )}
+                >
+                  <FontAwesomeIcon
+                    icon={faFileCirclePlus}
+                    className="mr-1.5 text-white"
+                  />
+                  追加
+                </button>
+
+                {/* 戻る用ボタン */}
+                <button
+                  onClick={closeModalNewTodo}
+                  className="my-2 justify-center whitespace-nowrap rounded-md bg-slate-500 px-4 py-2 text-white hover:bg-slate-700"
+                >
+                  <FontAwesomeIcon
+                    icon={faXmark}
+                    className="mr-1.5 text-white"
+                  />
+                  キャンセル
+                </button>
+              </div>
             </div>
-          </div>
-        </Modal>
+          </Modal>
+        </div>
       </div>
+      <div className="my-4">
+        <WelcomeMessage name="■■■" />
+      </div>
+
       <TodoList
         todos={todos}
         updateIsDone={updateIsDone}
         remove={remove}
         edit={edit}
       />
-
       {/* 完了タスク一括削除ボタン */}
       {/* タスクが1つもなければ表示しないようにしたい */}
       <button
         type="button"
         onClick={openModalCheckedDelete}
-        className="my-5 ml-4 rounded-md bg-red-500 px-3 py-1 font-bold text-white hover:bg-red-600"
+        className="ml-4 mt-4 rounded-md bg-red-500 px-4 py-2 text-white hover:bg-red-600"
       >
-        完了済みのタスクを削除
+        <FontAwesomeIcon icon={faTrashCan} className="text-white md:mr-1.5" />
+        完了済のタスクを削除
       </button>
       <Modal
         isOpen={modalCheckedDelete}

@@ -25,7 +25,9 @@ const TodoList = (props: Props) => {
   // const todos = props.todos;
 
   if (todos.length === 0) {
-    return <div className="ml-4">現在、登録されているタスクはありません</div>;
+    return (
+      <div className="ml-4">このメッセージを見ているということは...!?</div>
+    );
   }
 
   return (
