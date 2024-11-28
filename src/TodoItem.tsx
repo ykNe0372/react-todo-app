@@ -115,7 +115,7 @@ const TodoItem = (props: Props) => {
           onChange={(e) => props.updateIsDone(todo.id, e.target.checked)}
           className="mr-1.5 scale-110 cursor-pointer"
         />
-        <div className="mx-2 bg-cyan-950 px-2.5 py-5 text-sm text-slate-100">
+        <div className="mx-1 bg-cyan-950 px-1.5 py-5 text-sm text-slate-100 md:px-2.5">
           <div className="whitespace-nowrap text-sm md:text-base">優先度</div>
           <span className="mx-4 text-base">{todo.priority}</span>
         </div>

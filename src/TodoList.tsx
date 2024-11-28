@@ -31,7 +31,7 @@ const TodoList = (props: Props) => {
   }
 
   return (
-    <div className="ml-4 space-y-3">
+    <div className="mx-2 space-y-3">
       {todos.map((todo) => (
         <TodoItem
           key={todo.id}

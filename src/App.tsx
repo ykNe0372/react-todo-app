@@ -173,7 +173,7 @@ const App = () => {
           <button
             type="button"
             onClick={openModalNewTodo}
-            className="ml-4 mt-2 flex items-center justify-center whitespace-nowrap rounded-md bg-blue-400 px-4 py-2 text-white hover:bg-blue-600"
+            className="ml-4 mr-2 mt-2 flex items-center justify-center whitespace-nowrap rounded-md bg-blue-400 px-4 py-2 text-white hover:bg-blue-600"
           >
             <FontAwesomeIcon icon={faListCheck} className="mr-1.5 text-white" />
             タスクの追加
@@ -302,39 +302,18 @@ const App = () => {
                   />
                   追加
                 </button>
-                <div className="flex items-center gap-x-8">
-                  {/* 追加ボタン */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      addNewTodo();
-                      closeModalNewTodo();
-                    }}
-                    className={twMerge(
-                      "my-2 rounded-md bg-blue-400 px-4 py-2 font-bold text-white hover:bg-blue-400",
-                      (newTodoNameError || newTodoNoteError) &&
-                        "cursor-not-allowed opacity-50"
-                    )}
-                  >
-                    <FontAwesomeIcon
-                      icon={faFileCirclePlus}
-                      className="mr-1.5 text-white"
-                    />
-                    追加
-                  </button>
 
-                  {/* 戻る用ボタン */}
-                  <button
-                    onClick={closeModalNewTodo}
-                    className="my-2 justify-center whitespace-nowrap rounded-md bg-slate-500 px-4 py-2 text-white hover:bg-slate-700"
-                  >
-                    <FontAwesomeIcon
-                      icon={faXmark}
-                      className="mr-1.5 text-white"
-                    />
-                    キャンセル
-                  </button>
-                </div>
+                {/* 戻る用ボタン */}
+                <button
+                  onClick={closeModalNewTodo}
+                  className="my-2 justify-center whitespace-nowrap rounded-md bg-slate-500 px-4 py-2 text-white hover:bg-slate-700"
+                >
+                  <FontAwesomeIcon
+                    icon={faXmark}
+                    className="mr-1.5 text-white"
+                  />
+                  キャンセル
+                </button>
               </div>
             </div>
           </Modal>
@@ -355,7 +334,7 @@ const App = () => {
       <button
         type="button"
         onClick={openModalCheckedDelete}
-        className="ml-4 mt-4 rounded-md bg-red-500 px-4 py-2 text-white hover:bg-red-600"
+        className="ml-2 mt-4 rounded-md bg-red-500 px-4 py-2 text-white hover:bg-red-600"
       >
         <FontAwesomeIcon icon={faTrashCan} className="text-white md:mr-1.5" />
         完了済のタスクを削除
